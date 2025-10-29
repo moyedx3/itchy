@@ -1,10 +1,15 @@
 """Market resolution logic based on SEC data."""
 
 from typing import Optional, Dict, Any
-from sec_client import SECClient
-from config import TARGET_FORMS
 import json
 from datetime import datetime
+
+try:
+    from resolvers.sec.sec_client import SECClient  # type: ignore
+    from resolvers.sec.config import TARGET_FORMS  # type: ignore
+except ImportError:
+    from sec_client import SECClient  # type: ignore
+    from config import TARGET_FORMS  # type: ignore
 
 
 class MarketResolver:
