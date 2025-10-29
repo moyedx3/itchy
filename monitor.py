@@ -13,7 +13,19 @@ import signal
 import sys
 import argparse
 from resolver import MarketResolver
-from config import POLL_INTERVAL_SEC, DEFAULT_REVENUE_TAGS, DEFAULT_NET_INCOME_TAGS
+
+try:
+    from resolvers.sec.config import (  # type: ignore
+        POLL_INTERVAL_SEC,
+        DEFAULT_REVENUE_TAGS,
+        DEFAULT_NET_INCOME_TAGS,
+    )
+except ImportError:
+    from config import (  # type: ignore
+        POLL_INTERVAL_SEC,
+        DEFAULT_REVENUE_TAGS,
+        DEFAULT_NET_INCOME_TAGS,
+    )
 
 
 def signal_handler(sig, frame):

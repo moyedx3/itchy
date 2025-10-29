@@ -3,7 +3,11 @@
 import requests
 import time
 from typing import Optional, Dict, Any, List
-from config import SEC_HEADERS
+
+try:
+    from .config import SEC_HEADERS  # type: ignore[attr-defined]
+except ImportError:
+    from config import SEC_HEADERS  # type: ignore
 
 
 class SECClient:
@@ -88,6 +92,7 @@ class SECClient:
                         "tag": tag,
                         "value": latest["val"],
                         "end": latest["end"],
+                        "currency": "usd",
                         "accession": latest["accn"],
                         "form": latest.get("form", ""),
                         "filed": latest.get("filed", ""),
@@ -128,4 +133,3 @@ class SECClient:
                 })
         
         return filings
-
