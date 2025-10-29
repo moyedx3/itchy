@@ -392,23 +392,25 @@ class OpenDartClient:
             raise OpenDartError("account_names must contain at least one value")
 
         code = self._ensure_corp_code(corp_code)
-        context_year, context_period, context_filing = self._infer_reporting_context(code)
+        contexts = self._collect_reporting_contexts(code, year, period)
 
-        years_to_try = self._build_year_candidates(year, context_year)
-        periods_to_try = self._build_period_candidates(period, context_period)
+        seen: set[tuple[int, str]] = set()
+        for ctx_year, ctx_period, filing in contexts:
+            if ctx_year is None or ctx_period is None:
+                continue
+            key = (ctx_year, ctx_period)
+            if key in seen:
+                continue
+            seen.add(key)
 
-        names = list(account_names)
-
-        for candidate_year in years_to_try:
-            for candidate_period in periods_to_try:
-                metric = self.get_financial_metric(
-                    names,
-                    year=candidate_year,
-                    period=candidate_period,
-                    corp_code=code,
-                )
-                if metric and metric.get("current_amount") is not None:
-                    return self._build_latest_metric_payload(metric, context_filing)
+            metric = self.get_financial_metric(
+                account_names,
+                year=ctx_year,
+                period=ctx_period,
+                corp_code=code,
+            )
+            if metric and metric.get("current_amount") is not None:
+                return self._build_latest_metric_payload(metric, filing)
 
         return None
 
@@ -437,51 +439,52 @@ class OpenDartClient:
             "fiscal_period": fiscal_label,
         }
 
-    def _infer_reporting_context(
-        self, corp_code: str
-    ) -> Tuple[Optional[int], Optional[str], Optional[Dict[str, Any]]]:
-        filings = self.list_filings(corp_code=corp_code, kind="A", limit=1)
-        if not filings:
-            return None, None, None
-        filing = filings[0]
-        report_nm = filing.get("report_nm", "")
-        year = self._extract_year(filing) or self._extract_year_from_report(report_nm)
-        period = self._infer_period_from_report(report_nm)
-        return year, period, filing
+    def _collect_reporting_contexts(
+        self,
+        corp_code: str,
+        explicit_year: Optional[int],
+        explicit_period: Optional[str],
+    ) -> List[Tuple[Optional[int], Optional[str], Optional[Dict[str, Any]]]]:
+        ordered: List[Tuple[Optional[int], Optional[str], Optional[Dict[str, Any]]]] = []
 
-    def _build_year_candidates(
-        self, explicit_year: Optional[int], inferred_year: Optional[int]
-    ) -> List[int]:
-        if explicit_year is not None:
-            return [explicit_year]
-        candidates: List[int] = []
-        if inferred_year is not None:
-            candidates.append(inferred_year)
-            candidates.append(inferred_year - 1)
+        # 1) User overrides (highest priority)
+        if explicit_year is not None and explicit_period is not None:
+            ordered.append((explicit_year, explicit_period, None))
         else:
-            today = _dt.date.today()
-            candidates.append(today.year)
-            candidates.append(today.year - 1)
-        unique: List[int] = []
-        seen = set()
-        for value in candidates:
-            if value not in seen:
-                unique.append(value)
-                seen.add(value)
-        return unique
+            if explicit_year is not None:
+                for period_key in PERIOD_FALLBACK_ORDER:
+                    ordered.append((explicit_year, period_key, None))
+            if explicit_period is not None:
+                current_year = _dt.date.today().year
+                for year_candidate in (current_year, current_year - 1):
+                    ordered.append((year_candidate, explicit_period, None))
 
-    def _build_period_candidates(
-        self, explicit_period: Optional[str], inferred_period: Optional[str]
-    ) -> List[str]:
-        if explicit_period:
-            return [explicit_period]
-        candidates: List[str] = []
-        if inferred_period:
-            candidates.append(inferred_period)
-        for period in PERIOD_FALLBACK_ORDER:
-            if period not in candidates:
-                candidates.append(period)
-        return candidates
+        # 2) Latest regular filings from DART
+        filings = self.list_filings(corp_code=corp_code, kind="A", limit=6)
+        for filing in sorted(filings, key=lambda f: f.get("rcept_dt", ""), reverse=True):
+            report_nm = filing.get("report_nm", "")
+            year = self._extract_year(filing) or self._extract_year_from_report(report_nm)
+            period = self._infer_period_from_report(report_nm)
+            ordered.append((year, period, filing))
+
+        # 3) Fallback combos if nothing usable so far
+        if not ordered:
+            current_year = _dt.date.today().year
+            for year_candidate in (current_year, current_year - 1):
+                for period_key in PERIOD_FALLBACK_ORDER:
+                    ordered.append((year_candidate, period_key, None))
+
+        # Deduplicate while preserving priority
+        deduped: List[Tuple[Optional[int], Optional[str], Optional[Dict[str, Any]]]] = []
+        seen: set[Tuple[Optional[int], Optional[str]]] = set()
+        for year, period, filing in ordered:
+            key = (year, period)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append((year, period, filing))
+
+        return deduped
 
     def _extract_period_end(self, period_text: Optional[str]) -> Optional[str]:
         if not period_text:
@@ -544,103 +547,6 @@ class OpenDartClient:
         return None
 
     # ------------------------------------------------------------------
-    # Disclosure content helpers
-    # ------------------------------------------------------------------
-    def get_document(self, receipt_no: str) -> str:
-        """Return the raw text for a specific filing (공시서류원본)."""
-
-        if not receipt_no:
-            raise OpenDartError("receipt_no is required")
-        return self._call(self._dart.document, receipt_no)
-
-    def get_document_list(self, receipt_no: str) -> List[Dict[str, Any]]:
-        """Return all document nodes (사업/감사보고서 등)."""
-
-        if not receipt_no:
-            raise OpenDartError("receipt_no is required")
-        docs = self._call(self._dart.document_all, receipt_no)
-        if isinstance(docs, list):
-            normalised: List[Dict[str, Any]] = []
-            for doc in docs:
-                if isinstance(doc, dict):
-                    normalised.append({
-                        "title": doc.get("title"),
-                        "text": doc.get("text"),
-                    })
-                else:
-                    normalised.append({
-                        "title": None,
-                        "text": doc,
-                    })
-            return normalised
-        return self._to_records(docs)
-
-    def list_sub_documents(self, receipt_no: str, keyword: Optional[str] = None) -> List[Dict[str, Any]]:
-        """List sub-documents (하위 문서). Optionally filter by keyword."""
-
-        if not receipt_no:
-            raise OpenDartError("receipt_no is required")
-        if keyword:
-            frame = self._call(self._dart.sub_docs, receipt_no, match=keyword)
-        else:
-            frame = self._call(self._dart.sub_docs, receipt_no)
-        return self._to_records(frame)
-
-    def list_attachments(self, receipt_no: str) -> Dict[str, str]:
-        """Return a mapping of attachment names to download URLs."""
-
-        if not receipt_no:
-            raise OpenDartError("receipt_no is required")
-        return self._call(self._dart.attach_files, receipt_no) or {}
-
-    def download_attachment(self, url: str, destination: str) -> None:
-        """Download a single attachment to ``destination`` path."""
-
-        if not url:
-            raise OpenDartError("url is required for download")
-        if not destination:
-            raise OpenDartError("destination path is required for download")
-        self._call(self._dart.download, url, destination)
-
-    # ------------------------------------------------------------------
-    # Event / shareholding helpers
-    # ------------------------------------------------------------------
-    def get_events(
-        self,
-        corp: Optional[str] = None,
-        event: Optional[str] = None,
-        start: Optional[str] = None,
-        end: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
-        """Wrapper for 주요사항보고 (events)."""
-
-        corp_identifier = corp or self.corp_code or self.corp_name
-        if not corp_identifier:
-            raise OpenDartError("corp or initialized corporation must be provided")
-        frame = self._call(
-            self._dart.event,
-            corp_identifier,
-            event,
-            start=start,
-            end=end,
-        )
-        return self._to_records(frame)
-
-    def get_major_shareholders(self, corp: Optional[str] = None) -> List[Dict[str, Any]]:
-        corp_identifier = corp or self.corp_code or self.corp_name
-        if not corp_identifier:
-            raise OpenDartError("corp must be provided")
-        frame = self._call(self._dart.major_shareholders, corp_identifier)
-        return self._to_records(frame)
-
-    def get_major_exec_shareholders(self, corp: Optional[str] = None) -> List[Dict[str, Any]]:
-        corp_identifier = corp or self.corp_code or self.corp_name
-        if not corp_identifier:
-            raise OpenDartError("corp must be provided")
-        frame = self._call(self._dart.major_shareholders_exec, corp_identifier)
-        return self._to_records(frame)
-
-    # ------------------------------------------------------------------
     # Utilities
     # ------------------------------------------------------------------
     def _coerce_date_str(
@@ -666,16 +572,16 @@ class OpenDartClient:
     def _resolve_report_code(self, period: str) -> str:
         period_key = (period or "annual").lower()
         mapping = {
-            "annual": "11014",
-            "business": "11014",
-            "q4": "11014",
-            "q1": "11011",
-            "first": "11011",
+            "annual": "11011",
+            "business": "11011",
+            "q4": "11011",
             "half": "11012",
             "semiannual": "11012",
             "q2": "11012",
-            "q3": "11013",
-            "third": "11013",
+            "q1": "11013",
+            "first": "11013",
+            "q3": "11014",
+            "third": "11014",
         }
         code = mapping.get(period_key)
         if not code:
@@ -697,4 +603,3 @@ class OpenDartClient:
             return float(text)
         except ValueError:
             return None
-

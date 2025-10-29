@@ -34,5 +34,3 @@ AMOUNT_COLUMNS = (
     "frmtrm_amount",  # previous period
     "bfefrmtrm_amount",  # two periods ago (annual only)
 )
-
-
