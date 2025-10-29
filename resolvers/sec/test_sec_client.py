@@ -2,7 +2,6 @@
 """Quick test script to verify SEC API client works."""
 
 from sec_client import SECClient
-from config import CIK
 import json
 
 
@@ -12,7 +11,7 @@ def test_client():
     print("Testing SEC Client")
     print("="*60)
     
-    client = SECClient()
+    client = SECClient("0000320193")
     
     # Test 1: Fetch submissions
     print("\n1. Fetching submissions...")
@@ -38,7 +37,7 @@ def test_client():
     
     # Test 3: Extract revenue
     print("\n3. Extracting latest revenue...")
-    revenue = client.get_latest_revenue(facts)
+    revenue = client.get_latest_metric(facts, ["Revenues"])
     if revenue:
         print(f"✅ Success!")
         print(f"   Tag:          {revenue['tag']}")
