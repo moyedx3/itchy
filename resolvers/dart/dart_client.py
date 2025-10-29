@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import datetime as _dt
+import re
 import time
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 try:
     import OpenDartReader as _OpenDartReader  # type: ignore
@@ -38,6 +39,21 @@ except ImportError:
         REPORT_CODE_LABELS,
         AMOUNT_COLUMNS,
     )
+
+
+PERIOD_FISCAL_LABEL = {
+    "annual": "FY",
+    "business": "FY",
+    "q4": "FY",
+    "half": "HY",
+    "q2": "HY",
+    "q1": "Q1",
+    "first": "Q1",
+    "q3": "Q3",
+    "third": "Q3",
+}
+
+PERIOD_FALLBACK_ORDER = ["half", "annual", "q3", "q1"]
 
 
 class OpenDartError(RuntimeError):
@@ -228,6 +244,40 @@ class OpenDartClient:
             return records[:limit]
         return records
 
+    def get_recent_filings(
+        self,
+        forms: Optional[Sequence[str]] = None,
+        limit: int = 30,
+        corp_code: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Mimic SECClient.get_recent_filings with DART data."""
+
+        code = self._ensure_corp_code(corp_code)
+        forms = list(forms) if forms else []
+
+        records: List[Dict[str, Any]] = []
+        if forms:
+            for form in forms:
+                subset = self.list_filings(corp_code=code, kind=form, limit=limit)
+                records.extend(subset)
+        else:
+            records = self.list_filings(corp_code=code, limit=limit)
+
+        trimmed = records[:limit]
+        results: List[Dict[str, Any]] = []
+        for rec in trimmed:
+            filing_date_raw = rec.get("rcept_dt")
+            filing_date = self._normalize_date_string(filing_date_raw) if filing_date_raw else None
+            results.append(
+                {
+                    "form": rec.get("report_nm"),
+                    "accession": rec.get("rcept_no"),
+                    "filing_date": filing_date,
+                    "raw": rec,
+                }
+            )
+        return results
+
     # ------------------------------------------------------------------
     # Financial statements helpers
     # ------------------------------------------------------------------
@@ -327,6 +377,171 @@ class OpenDartClient:
             },
             "raw": row,
         }
+
+    # ------------------------------------------------------------------
+    # Metric interface aligned with SECClient
+    # ------------------------------------------------------------------
+    def get_latest_metric(
+        self,
+        account_names: Sequence[str],
+        year: Optional[int] = None,
+        period: Optional[str] = None,
+        corp_code: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        if not account_names:
+            raise OpenDartError("account_names must contain at least one value")
+
+        code = self._ensure_corp_code(corp_code)
+        context_year, context_period, context_filing = self._infer_reporting_context(code)
+
+        years_to_try = self._build_year_candidates(year, context_year)
+        periods_to_try = self._build_period_candidates(period, context_period)
+
+        names = list(account_names)
+
+        for candidate_year in years_to_try:
+            for candidate_period in periods_to_try:
+                metric = self.get_financial_metric(
+                    names,
+                    year=candidate_year,
+                    period=candidate_period,
+                    corp_code=code,
+                )
+                if metric and metric.get("current_amount") is not None:
+                    return self._build_latest_metric_payload(metric, context_filing)
+
+        return None
+
+    def _build_latest_metric_payload(
+        self,
+        metric: Dict[str, Any],
+        filing: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        report = metric.get("report", {})
+        raw = metric.get("raw", {})
+        period_key = str(report.get("period", "")).lower()
+        fiscal_label = PERIOD_FISCAL_LABEL.get(period_key, period_key.upper())
+        end_date = self._extract_period_end(metric.get("current_date"))
+        accession = raw.get("rcept_no") or (filing.get("rcept_no") if filing else None)
+        filed = filing.get("rcept_dt") if filing else None
+
+        return {
+            "tag": metric.get("account_name"),
+            "value": metric.get("current_amount"),
+            "end": end_date,
+            "currency": metric.get("currency", "krw"),
+            "accession": accession,
+            "form": report.get("reprt_name", ""),
+            "filed": filed,
+            "fiscal_year": report.get("year"),
+            "fiscal_period": fiscal_label,
+        }
+
+    def _infer_reporting_context(
+        self, corp_code: str
+    ) -> Tuple[Optional[int], Optional[str], Optional[Dict[str, Any]]]:
+        filings = self.list_filings(corp_code=corp_code, kind="A", limit=1)
+        if not filings:
+            return None, None, None
+        filing = filings[0]
+        report_nm = filing.get("report_nm", "")
+        year = self._extract_year(filing) or self._extract_year_from_report(report_nm)
+        period = self._infer_period_from_report(report_nm)
+        return year, period, filing
+
+    def _build_year_candidates(
+        self, explicit_year: Optional[int], inferred_year: Optional[int]
+    ) -> List[int]:
+        if explicit_year is not None:
+            return [explicit_year]
+        candidates: List[int] = []
+        if inferred_year is not None:
+            candidates.append(inferred_year)
+            candidates.append(inferred_year - 1)
+        else:
+            today = _dt.date.today()
+            candidates.append(today.year)
+            candidates.append(today.year - 1)
+        unique: List[int] = []
+        seen = set()
+        for value in candidates:
+            if value not in seen:
+                unique.append(value)
+                seen.add(value)
+        return unique
+
+    def _build_period_candidates(
+        self, explicit_period: Optional[str], inferred_period: Optional[str]
+    ) -> List[str]:
+        if explicit_period:
+            return [explicit_period]
+        candidates: List[str] = []
+        if inferred_period:
+            candidates.append(inferred_period)
+        for period in PERIOD_FALLBACK_ORDER:
+            if period not in candidates:
+                candidates.append(period)
+        return candidates
+
+    def _extract_period_end(self, period_text: Optional[str]) -> Optional[str]:
+        if not period_text:
+            return None
+        text = str(period_text)
+        if "~" in text:
+            end_part = text.split("~")[-1]
+        else:
+            end_part = text
+        normalized = self._normalize_date_string(end_part.strip())
+        return normalized or None
+
+    def _normalize_date_string(self, text: Optional[str]) -> str:
+        if text is None:
+            return ""
+        cleaned = str(text).strip().replace(".", "-").replace("/", "-")
+        match = re.match(r"(\d{4})-?(\d{2})-?(\d{2})", cleaned)
+        if match:
+            return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+        return cleaned
+
+    def _extract_year(self, filing: Dict[str, Any]) -> Optional[int]:
+        for key in ("bsns_year", "year", "rcept_dt"):
+            value = filing.get(key)
+            if not value:
+                continue
+            if isinstance(value, int):
+                return value
+            try:
+                return int(str(value)[:4])
+            except (TypeError, ValueError):
+                continue
+        return None
+
+    def _extract_year_from_report(self, report_nm: str) -> Optional[int]:
+        if not report_nm:
+            return None
+        match = re.search(r"(20\d{2})", report_nm)
+        if match:
+            return int(match.group(1))
+        return None
+
+    def _infer_period_from_report(self, report_nm: str) -> Optional[str]:
+        if not report_nm:
+            return None
+        lower = report_nm.lower()
+        mappings = {
+            "반기": "half",
+            "semi": "half",
+            "사업": "annual",
+            "연간": "annual",
+            "1분기": "q1",
+            "1q": "q1",
+            "3분기": "q3",
+            "3q": "q3",
+        }
+        for keyword, period in mappings.items():
+            if keyword in lower:
+                return period
+        return None
 
     # ------------------------------------------------------------------
     # Disclosure content helpers

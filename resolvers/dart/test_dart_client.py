@@ -46,58 +46,49 @@ def main() -> None:
     print("\n2. Recent filings (kind=A)")
     filings = client.list_filings(kind="A", limit=5)
     for idx, filing in enumerate(filings, start=1):
-        print(f"  {idx}. {filing.get('report_nm')} — {filing.get('rcept_dt')} ({filing.get('rcp_no')})")
+        print(f"  {idx}. {filing.get('report_nm')} — {filing.get('rcept_dt')} ({filing.get('rcept_no')})")
 
     # Financial metric -------------------------------------------------
     print("\n3. Latest revenue metric")
-    period = _infer_period(filings)
-    metric = client.get_financial_metric([
-        "매출액",  # primary Korean label
+    metric = client.get_latest_metric([
+        "매출액",
+        "매출총액",
         "영업수익",
         "Revenue",
-    ], year=_infer_latest_year(filings), period=period)
+    ])
 
     if metric:
         print(json.dumps(metric, ensure_ascii=False, indent=2))
     else:
         print("  → Could not locate revenue metric in finstate response")
 
+
+    # Test with multiple companies
+    print("\n4. Testing with multiple companies")
+    companies = [
+        "222800", # 심텍 (KOSDAQ : 222800)
+        "005930", # 삼성전자 (KOSPI : 005930)
+        "138040", # 메리츠금융지주 (KOSPI : 138040)
+    ]
+    for company in companies:
+        client = OpenDartClient(corp_code=company)
+
+        # filings = client.list_filings(kind="A", limit=5)
+        # for filing in filings:
+        #     print(f"  {filing.get('report_nm')} — {filing.get('rcept_dt')} ({filing.get('rcept_no')})")
+
+        company = client.get_company()
+        metric = client.get_latest_metric([
+            "매출액",
+            "매출총액",
+            "영업수익",
+            "Revenue",
+        ])
+
+        print(f"Company: {company.get('corp_name')} ({company.get('corp_code')})")
+        print(json.dumps(metric, ensure_ascii=False, indent=2))
+
     print("\nDone ✅")
-
-
-def _infer_latest_year(filings):  # type: ignore[no-untyped-def]
-    for filing in filings:
-        date = filing.get("rcept_dt")
-        if date and len(date) >= 4:
-            try:
-                return int(date[:4])
-            except ValueError:
-                continue
-    return _fallback_year()
-
-
-def _infer_period(filings):  # type: ignore[no-untyped-def]
-    if not filings:
-        return "annual"
-    report_nm = filings[0].get("report_nm", "") or ""
-    if "반기" in report_nm:
-        return "half"
-    if "1분기" in report_nm or "1/4" in report_nm or "1Q" in report_nm:
-        return "q1"
-    if "3분기" in report_nm or "3/4" in report_nm or "3Q" in report_nm:
-        return "q3"
-    if "사업보고서" in report_nm or "연간" in report_nm:
-        return "annual"
-    return "annual"
-
-
-def _fallback_year() -> int:
-    from datetime import date
-
-    return date.today().year - 1
-
 
 if __name__ == "__main__":
     main()
-
-

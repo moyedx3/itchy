@@ -133,4 +133,3 @@ class SECClient:
                 })
         
         return filings
-
