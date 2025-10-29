@@ -97,6 +97,7 @@ Full data:
 {
   "cik": "0000320193",
   "company": "Apple Inc.",
+  "currency": "usd",
   "filing": {
     "form": "10-Q",
     "accession": "0000320193-25-000073",
@@ -105,11 +106,13 @@ Full data:
   "metric": {
     "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
     "value": 313695000000.0,
+     "currency": "usd",
     "period_end": "2025-06-28",
     "fiscal_year": 2025,
     "fiscal_period": "Q3"
   },
   "estimate": 125000000000.0,
+  "estimate_currency": "usd",
   "outcome": "YES",
   "resolved_at": "2025-10-14T16:56:05Z"
 }

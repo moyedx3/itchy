@@ -20,6 +20,20 @@ class MarketResolver:
         self.tags = tags
         self.estimate = estimate
         self.last_checked_accession = None
+
+    @staticmethod
+    def _format_amount(value: float, currency: str) -> str:
+        """Format numeric values with currency-aware symbols."""
+        currency_code = (currency or "").lower()
+        symbol_map = {
+            "usd": "$",
+            "krw": "₩",
+        }
+        symbol = symbol_map.get(currency_code, "")
+        if symbol:
+            return f"{symbol}{value:,.0f}"
+        suffix = currency_code.upper() if currency_code else ""
+        return f"{value:,.0f}{(' ' + suffix) if suffix else ''}"
     
     def check_for_resolution(self) -> Optional[Dict[str, Any]]:
         """Check if a new filing allows market resolution.
@@ -59,10 +73,14 @@ class MarketResolver:
         # Resolve market
         actual_value = float(metric_data["value"])
         outcome = "YES" if actual_value > self.estimate else "NO"
+        metric_currency = metric_data.get("currency", "usd").lower()
+        metric_formatted = self._format_amount(actual_value, metric_currency)
+        estimate_formatted = self._format_amount(self.estimate, metric_currency)
         
         resolution = {
             "cik": self.client.cik,
             "company": facts.get("entityName", "Unknown"),
+            "currency": metric_currency,
             "filing": {
                 "form": latest_filing["form"],
                 "accession": latest_filing["accession"],
@@ -71,13 +89,15 @@ class MarketResolver:
             "metric": {
                 "tag": metric_data["tag"],
                 "value": actual_value,
-                "formatted": f"${actual_value:,.0f}",
+                "formatted": metric_formatted,
+                "currency": metric_currency,
                 "period_end": metric_data["end"],
                 "fiscal_year": metric_data["fiscal_year"],
                 "fiscal_period": metric_data["fiscal_period"]
             },
             "estimate": self.estimate,
-            "estimate_formatted": f"${self.estimate:,.0f}",
+            "estimate_currency": metric_currency,
+            "estimate_formatted": estimate_formatted,
             "outcome": outcome,
             "resolved_at": datetime.utcnow().isoformat()
         }

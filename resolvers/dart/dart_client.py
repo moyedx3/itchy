@@ -251,7 +251,6 @@ class OpenDartClient:
         reprt_code = self._resolve_report_code(period)
         # OpenDartReader currently exposes only consolidated statements via finstate.
         # Separate financials require a different endpoint; for now we ignore the flag.
-        _ = consolidated
 
         frame = self._call(self._dart.finstate, code, year, reprt_code=reprt_code)
         return self._to_records(frame)
@@ -305,6 +304,8 @@ class OpenDartClient:
             for key in AMOUNT_COLUMNS
             if key in row
         }
+        currency_raw = row.get("currency") or "KRW"
+        currency_norm = str(currency_raw).strip().lower() if currency_raw else "krw"
 
         return {
             "account_name": row.get("account_nm"),
@@ -316,6 +317,7 @@ class OpenDartClient:
             "previous_label": row.get("frmtrm_nm"),
             "previous_date": row.get("frmtrm_dt"),
             "two_periods_ago_amount": parsed_amounts.get("bfefrmtrm_amount"),
+            "currency": currency_norm,
             "report": {
                 "year": year,
                 "period": period,

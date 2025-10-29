@@ -92,6 +92,7 @@ class SECClient:
                         "tag": tag,
                         "value": latest["val"],
                         "end": latest["end"],
+                        "currency": "usd",
                         "accession": latest["accn"],
                         "form": latest.get("form", ""),
                         "filed": latest.get("filed", ""),
