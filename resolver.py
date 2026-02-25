@@ -1,4 +1,4 @@
-"""Market resolution logic based on SEC data."""
+"""Market resolution logic based on SEC and DART data."""
 
 from typing import Optional, Dict, Any
 import json
@@ -10,6 +10,17 @@ try:
 except ImportError:
     from sec_client import SECClient  # type: ignore
     from config import TARGET_FORMS  # type: ignore
+
+try:
+    from resolvers.dart.dart_client import OpenDartClient  # type: ignore
+    from resolvers.dart.config import DART_API_KEY  # type: ignore
+except ImportError:
+    try:
+        from dart_client import OpenDartClient  # type: ignore
+        from config import DART_API_KEY  # type: ignore
+    except ImportError:
+        OpenDartClient = None  # type: ignore
+        DART_API_KEY = None  # type: ignore
 
 
 class MarketResolver:
@@ -127,3 +138,58 @@ class MarketResolver:
         print(json.dumps(resolution, indent=2))
         print("\n")
 
+
+class DartMarketResolver:
+    """Resolves markets based on Korean DART filing data."""
+
+    def __init__(self, corp_name: str, tags: list[str], estimate: float):
+        if OpenDartClient is None:
+            raise RuntimeError("OpenDartClient not available. Install dart dependencies.")
+        self.client = OpenDartClient(corp_name=corp_name)
+        self.tags = tags
+        self.estimate = estimate
+        self.corp_name = corp_name
+
+    def check_for_resolution(self) -> Optional[Dict[str, Any]]:
+        """Check if DART financial data allows market resolution.
+
+        Returns:
+            Resolution result dict if market can be resolved, None otherwise
+        """
+        metric_data = self.client.get_latest_metric(account_names=self.tags)
+        if not metric_data:
+            print(f"Could not extract metric for {self.corp_name}")
+            return None
+
+        actual_value = float(metric_data["value"])
+        outcome = "YES" if actual_value > self.estimate else "NO"
+        metric_currency = metric_data.get("currency", "krw").lower()
+        metric_formatted = MarketResolver._format_amount(actual_value, metric_currency)
+        estimate_formatted = MarketResolver._format_amount(self.estimate, metric_currency)
+
+        resolution = {
+            "corp_name": self.corp_name,
+            "company": self.corp_name,
+            "currency": metric_currency,
+            "filing": {
+                "form": metric_data.get("form", ""),
+                "accession": metric_data.get("accession", ""),
+                "filing_date": metric_data.get("filed", ""),
+            },
+            "metric": {
+                "tag": metric_data["tag"],
+                "value": actual_value,
+                "formatted": metric_formatted,
+                "currency": metric_currency,
+                "period_end": metric_data.get("end", ""),
+                "fiscal_year": metric_data.get("fiscal_year"),
+                "fiscal_period": metric_data.get("fiscal_period", ""),
+            },
+            "estimate": self.estimate,
+            "estimate_currency": metric_currency,
+            "estimate_formatted": estimate_formatted,
+            "outcome": outcome,
+            "resolved_at": datetime.utcnow().isoformat(),
+        }
+
+        return resolution

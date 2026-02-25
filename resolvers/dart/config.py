@@ -34,3 +34,23 @@ AMOUNT_COLUMNS = (
     "frmtrm_amount",  # previous period
     "bfefrmtrm_amount",  # two periods ago (annual only)
 )
+
+
+# ── Korean metric presets (matched to DART account_nm values) ──────────────
+
+DEFAULT_KR_REVENUE_TAGS = [
+    "매출액",
+    "매출총액",
+    "영업수익",
+    "Revenue",
+]
+
+DEFAULT_KR_OPERATING_INCOME_TAGS = [
+    "영업이익",
+    "영업손익",
+]
+
+DEFAULT_KR_NET_INCOME_TAGS = [
+    "당기순이익",
+    "당기순손익",
+]

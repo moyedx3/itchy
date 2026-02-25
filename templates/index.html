@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itchy — Market Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06060a;
+      --surface: #111116;
+      --surface-2: #1a1a21;
+      --surface-3: #222230;
+      --border: #25252e;
+      --border-hover: #3a3a48;
+      --text: #eeeef0;
+      --text-muted: #9d9daa;
+      --text-dim: #5e5e6e;
+      --cyan: #00e5ff;
+      --cyan-dim: rgba(0, 229, 255, 0.12);
+      --purple: #b388ff;
+      --purple-dim: rgba(179, 136, 255, 0.12);
+      --green: #00e676;
+      --green-dim: rgba(0, 230, 118, 0.12);
+      --red: #ff3d71;
+      --red-dim: rgba(255, 61, 113, 0.12);
+      --amber: #ffab40;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient glow ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -40%; left: -20%;
+      width: 80vw; height: 80vw;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px) saturate(1.4);
+      background: rgba(6, 6, 10, 0.75);
+      position: sticky; top: 0; z-index: 100;
+    }
+
+    .logo { display: flex; align-items: center; gap: 0.7rem; }
+
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--cyan), #7c5cff);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 16px; font-weight: 800;
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
+    }
+
+    .logo h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.03em; }
+    .logo h1 span { color: var(--text-dim); font-weight: 400; font-size: 0.85rem; margin-left: 0.4rem; }
+
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.2);
+    }
+    .btn-primary:hover { box-shadow: 0 0 24px rgba(0, 229, 255, 0.35); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-hover); }
+
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid transparent; }
+    .btn-danger:hover { background: var(--red-dim); }
+
+    .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.78rem; }
+
+    /* ── Main ── */
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.75rem 2rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Source Toggle ── */
+    .source-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.2rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px;
+      width: fit-content;
+    }
+
+    .source-tab {
+      padding: 0.4rem 1.2rem;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .source-tab.active-sec {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+
+    .source-tab.active-dart {
+      background: var(--purple-dim);
+      color: var(--purple);
+    }
+
+    .source-tab:hover:not(.active-sec):not(.active-dart) {
+      color: var(--text-muted);
+    }
+
+    /* ── Create Section ── */
+    .create-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .create-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.4;
+    }
+
+    .create-section.dart-mode::before {
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .section-title {
+      font-size: 0.95rem; font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      color: var(--text);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; position: relative; }
+
+    .form-group label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.85rem;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      transition: border-color 0.15s;
+      outline: none;
+      width: 100%;
+    }
+
+    input:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.08); }
+    .dart-mode input:focus { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(179, 136, 255, 0.08); }
+    input::placeholder { color: var(--text-dim); }
+
+    .preset-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+
+    .dart-mode .preset-btn.active {
+      border-color: var(--purple);
+      color: var(--purple);
+      background: var(--purple-dim);
+    }
+
+    .preset-btn:hover:not(.active) { border-color: var(--border-hover); color: var(--text); }
+
+    .custom-tags-wrap {
+      margin-bottom: 1rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .custom-tags-wrap.open { max-height: 80px; }
+
+    .form-footer { display: flex; justify-content: flex-end; }
+
+    /* ── Autocomplete ── */
+    .ac-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 50;
+      margin-top: 4px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    .ac-item {
+      padding: 0.55rem 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      transition: background 0.1s;
+    }
+
+    .ac-item:hover { background: var(--surface-3); }
+
+    .ac-name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .ac-meta {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .ac-chip {
+      font-size: 0.6rem;
+      font-family: 'Space Mono', monospace;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background: var(--surface-3);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .selected-info {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .selected-chip {
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      background: var(--purple-dim);
+      color: var(--purple);
+      border: 1px solid rgba(179,136,255,0.2);
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Markets Grid ── */
+    .markets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1rem;
+    }
+
+    .market-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .market-card:hover { border-color: var(--border-hover); }
+
+    .market-card.resolved-yes {
+      border-color: rgba(0, 230, 118, 0.25);
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.05);
+    }
+
+    .market-card.resolved-no {
+      border-color: rgba(255, 61, 113, 0.25);
+      box-shadow: 0 0 30px rgba(255, 61, 113, 0.05);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.9rem;
+    }
+
+    .card-company {
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 0.15rem;
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .badge-active { background: var(--cyan-dim); color: var(--cyan); }
+    .badge-yes { background: var(--green-dim); color: var(--green); }
+    .badge-no { background: var(--red-dim); color: var(--red); }
+    .badge-sec { background: var(--cyan-dim); color: var(--cyan); }
+    .badge-dart { background: var(--purple-dim); color: var(--purple); }
+
+    /* Outcome banner */
+    .outcome {
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.9rem;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .outcome-yes {
+      background: var(--green-dim);
+      border: 1px solid rgba(0, 230, 118, 0.18);
+    }
+
+    .outcome-no {
+      background: var(--red-dim);
+      border: 1px solid rgba(255, 61, 113, 0.18);
+    }
+
+    .outcome-icon { font-size: 1.15rem; }
+
+    .outcome-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .outcome-yes .outcome-label { color: var(--green); }
+    .outcome-no .outcome-label { color: var(--red); }
+
+    /* Data grid */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem 1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .data-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .data-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text);
+      margin-top: 0.1rem;
+    }
+
+    .data-value.big {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .data-item { display: flex; flex-direction: column; gap: 0.05rem; }
+
+    /* Tags */
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .tag-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    /* Card footer */
+    .card-footer {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-dim);
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5; }
+    .empty p { font-size: 0.9rem; }
+
+    /* Toast */
+    .toast-wrap {
+      position: fixed;
+      bottom: 1.5rem; right: 1.5rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1.1rem;
+      font-size: 0.82rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      animation: toastIn 0.3s ease;
+      max-width: 380px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast-success { border-left: 3px solid var(--green); }
+    .toast-error { border-left: 3px solid var(--red); }
+
+    @keyframes toastIn {
+      from { transform: translateY(12px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.5s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+
+    /* ── Resolution detail ── */
+    .detail-json {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .detail-toggle {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .detail-toggle:hover { color: var(--text-muted); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      main { padding: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .markets-grid { grid-template-columns: 1fr; }
+      header { padding: 0.75rem 1rem; }
+      .stats-bar { gap: 1rem; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <h1>Itchy<span>Market Monitor</span></h1>
+    </div>
+    <div class="header-actions">
+      <div class="live-dot"></div>
+      <button class="btn btn-ghost btn-sm" onclick="loadMarkets()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── Create Market ── -->
+    <section class="create-section" id="create-section">
+      <div class="section-title">＋ New Market</div>
+
+      <!-- Source Toggle -->
+      <div class="source-toggle">
+        <button type="button" class="source-tab active-sec" data-source="sec" onclick="setSource('sec')">SEC</button>
+        <button type="button" class="source-tab" data-source="dart" onclick="setSource('dart')">DART 🇰🇷</button>
+      </div>
+
+      <form id="create-form" onsubmit="createMarket(event)">
+        <!-- SEC fields -->
+        <div class="form-row" id="sec-fields">
+          <div class="form-group">
+            <label>CIK (10-digit)</label>
+            <input type="text" id="inp-cik" placeholder="0000320193">
+          </div>
+          <div class="form-group">
+            <label>Estimate (USD)</label>
+            <input type="number" id="inp-estimate-sec" placeholder="125000000000" step="any">
+          </div>
+        </div>
+
+        <!-- DART fields -->
+        <div class="form-row hidden" id="dart-fields">
+          <div class="form-group">
+            <label>Company Name (한국어)</label>
+            <input type="text" id="inp-corp" placeholder="삼성전자" autocomplete="off">
+            <div class="ac-dropdown hidden" id="ac-dropdown"></div>
+            <div class="selected-info" id="selected-info"></div>
+          </div>
+          <div class="form-group">
+            <label>Estimate (KRW)</label>
+            <input type="number" id="inp-estimate-dart" placeholder="300000000000" step="any">
+          </div>
+        </div>
+
+        <label style="font-size:0.72rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.35rem;display:block;">Metric Type</label>
+        <div class="preset-row" id="preset-row"></div>
+
+        <div class="custom-tags-wrap" id="custom-wrap">
+          <div class="form-group">
+            <label id="custom-tags-label">XBRL Tags (comma-separated, priority order)</label>
+            <input type="text" id="inp-tags" placeholder="RevenueFromContractWithCustomerExcludingAssessedTax,SalesRevenueNet">
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary" id="btn-create">Create Market →</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── Stats ── -->
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat">
+        <span class="stat-value" id="stat-total">0</span>
+        <span class="stat-label">markets</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-active">0</span>
+        <span class="stat-label">active</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-resolved">0</span>
+        <span class="stat-label">resolved</span>
+      </div>
+    </div>
+
+    <!-- ── Markets ── -->
+    <div class="markets-grid" id="markets-grid"></div>
+    <div class="empty hidden" id="empty">
+      <div class="empty-icon">📊</div>
+      <p>No markets yet — create one above to start monitoring.</p>
+    </div>
+  </main>
+
+  <div class="toast-wrap" id="toasts"></div>
+
+  <script>
+    // ── State ──
+    let currentSource = 'sec';
+    let currentPreset = 'revenue';
+    let krUniverse = [];
+    let selectedCorp = null;
+
+    const SEC_PRESETS = [
+      { key: 'revenue', label: 'Revenue' },
+      { key: 'netincome', label: 'Net Income' },
+      { key: 'custom', label: 'Custom Tags' },
+    ];
+
+    const DART_PRESETS = [
+      { key: 'revenue', label: '매출액 (Revenue)' },
+      { key: 'operating_income', label: '영업이익 (Op. Income)' },
+      { key: 'netincome', label: '당기순이익 (Net Income)' },
+      { key: 'custom', label: 'Custom Tags' },
+    ];
+
+    // ── Source Toggle ──
+    function setSource(src) {
+      currentSource = src;
+      currentPreset = 'revenue';
+      selectedCorp = null;
+
+      document.querySelectorAll('.source-tab').forEach(t => {
+        t.classList.remove('active-sec', 'active-dart');
+      });
+      document.querySelector(`.source-tab[data-source="${src}"]`)
+        .classList.add(src === 'sec' ? 'active-sec' : 'active-dart');
+
+      const section = document.getElementById('create-section');
+      section.classList.toggle('dart-mode', src === 'dart');
+
+      document.getElementById('sec-fields').classList.toggle('hidden', src === 'dart');
+      document.getElementById('dart-fields').classList.toggle('hidden', src === 'sec');
+      document.getElementById('selected-info').innerHTML = '';
+      document.getElementById('custom-wrap').classList.remove('open');
+
+      const tagLabel = document.getElementById('custom-tags-label');
+      tagLabel.textContent = src === 'dart'
+        ? 'Account Names (comma-separated, e.g. 매출액,매출총액)'
+        : 'XBRL Tags (comma-separated, priority order)';
+
+      renderPresets();
+    }
+
+    function renderPresets() {
+      const presets = currentSource === 'dart' ? DART_PRESETS : SEC_PRESETS;
+      const row = document.getElementById('preset-row');
+      row.innerHTML = presets.map((p, i) =>
+        `<button type="button" class="preset-btn${i === 0 ? ' active' : ''}" data-preset="${p.key}" onclick="setPreset(this)">${p.label}</button>`
+      ).join('');
+      currentPreset = presets[0].key;
+    }
+
+    function setPreset(btn) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPreset = btn.dataset.preset;
+      document.getElementById('custom-wrap').classList.toggle('open', currentPreset === 'custom');
+    }
+
+    // ── KR Universe Autocomplete ──
+    async function loadKRUniverse() {
+      try {
+        const res = await fetch('/api/kr-universe');
+        krUniverse = await res.json();
+      } catch (e) {
+        krUniverse = [];
+      }
+    }
+
+    function setupAutocomplete() {
+      const inp = document.getElementById('inp-corp');
+      const dd = document.getElementById('ac-dropdown');
+
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase();
+        if (q.length < 1) { dd.classList.add('hidden'); return; }
+
+        const matches = krUniverse.filter(c =>
+          c.name_kr.toLowerCase().includes(q) ||
+          (c.stock_code && c.stock_code.includes(q))
+        ).slice(0, 12);
+
+        if (matches.length === 0) { dd.classList.add('hidden'); return; }
+
+        dd.innerHTML = matches.map(c => `
+          <div class="ac-item" data-code="${c.stock_code}" data-name="${c.name_kr}" data-sector="${c.sector}">
+            <span class="ac-name">${c.name_kr}</span>
+            <span class="ac-meta">
+              <span class="ac-chip">${c.sector}</span>
+              <span class="ac-chip">${c.stock_code}</span>
+            </span>
+          </div>
+        `).join('');
+
+        dd.classList.remove('hidden');
+
+        dd.querySelectorAll('.ac-item').forEach(item => {
+          item.addEventListener('click', () => {
+            selectedCorp = {
+              name_kr: item.dataset.name,
+              stock_code: item.dataset.code,
+              sector: item.dataset.sector,
+            };
+            inp.value = selectedCorp.name_kr;
+            dd.classList.add('hidden');
+            document.getElementById('selected-info').innerHTML = `
+              <span class="selected-chip">${selectedCorp.stock_code}</span>
+              <span class="selected-chip">${selectedCorp.sector}</span>
+              <span class="selected-chip">KOSPI</span>
+            `;
+          });
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.form-group')) dd.classList.add('hidden');
+      });
+    }
+
+    // ── Formatters ──
+    function fmtUSD(v) {
+      if (v == null) return '—';
+      const abs = Math.abs(v);
+      if (abs >= 1e12) return `$${(v / 1e12).toFixed(2)}T`;
+      if (abs >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
+      if (abs >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
+      return `$${v.toLocaleString()}`;
+    }
+
+    function fmtKRW(v) {
+      if (v == null) return '—';
+      const abs = Math.abs(v);
+      const sign = v < 0 ? '-' : '';
+      if (abs >= 1e12) return `${sign}₩${(abs / 1e12).toFixed(2)}조`;
+      if (abs >= 1e8) return `${sign}₩${(abs / 1e8).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}억`;
+      if (abs >= 1e4) return `${sign}₩${(abs / 1e4).toFixed(0)}만`;
+      return `${sign}₩${abs.toLocaleString()}`;
+    }
+
+    function fmtAmount(v, currency) {
+      if (!currency || currency.toLowerCase() === 'usd') return fmtUSD(v);
+      if (currency.toLowerCase() === 'krw') return fmtKRW(v);
+      return v != null ? `${v.toLocaleString()} ${currency.toUpperCase()}` : '—';
+    }
+
+    function truncTag(t, max) {
+      return t.length > max ? t.slice(0, max - 1) + '…' : t;
+    }
+
+    // ── Toast ──
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = msg;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+    }
+
+    // ── Load markets ──
+    async function loadMarkets() {
+      try {
+        const res = await fetch('/api/markets');
+        const data = await res.json();
+        render(data);
+      } catch (e) {
+        toast('Failed to load markets', 'error');
+      }
+    }
+
+    function render(markets) {
+      const grid = document.getElementById('markets-grid');
+      const empty = document.getElementById('empty');
+
+      const total = markets.length;
+      const active = markets.filter(m => m.status !== 'resolved').length;
+      const resolved = total - active;
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-active').textContent = active;
+      document.getElementById('stat-resolved').textContent = resolved;
+
+      if (total === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+
+      grid.innerHTML = markets.map(m => {
+        const done = m.status === 'resolved';
+        const yes = m.outcome === 'YES';
+        const src = m.source || 'sec';
+        const isDart = src === 'dart';
+        const cur = m.currency || (isDart ? 'krw' : 'usd');
+        const fmt = (v) => fmtAmount(v, cur);
+
+        const name = isDart
+          ? (m.corp_name || m.company_name || 'Unknown')
+          : (m.company_name || `CIK ${m.cik}`);
+        const sub = isDart
+          ? (m.stock_code ? `${m.stock_code} · KOSPI` : 'DART')
+          : `CIK ${m.cik}`;
+
+        const tags = Array.isArray(m.tags) ? m.tags : [];
+        const rd = m.resolution_data || {};
+        const metric = rd.metric || {};
+        const filing = rd.filing || {};
+        const cardClass = done ? (yes ? 'resolved-yes' : 'resolved-no') : '';
+
+        const sourceBadge = `<span class="badge ${isDart ? 'badge-dart' : 'badge-sec'}">${isDart ? 'DART' : 'SEC'}</span>`;
+        const statusBadge = `<span class="badge ${done ? (yes ? 'badge-yes' : 'badge-no') : 'badge-active'}">${done ? m.outcome : 'Active'}</span>`;
+
+        let outcomeHTML = '';
+        if (done) {
+          outcomeHTML = `
+            <div class="outcome ${yes ? 'outcome-yes' : 'outcome-no'}">
+              <span class="outcome-icon">${yes ? '🟢' : '🔴'}</span>
+              <span class="outcome-label">${yes ? 'YES' : 'NO'} — Actual ${yes ? '>' : '≤'} Estimate</span>
+            </div>`;
+        }
+
+        let detailHTML = '';
+        if (done) {
+          detailHTML = `
+            <div class="data-grid">
+              <div class="data-item">
+                <span class="data-label">Actual</span>
+                <span class="data-value big">${fmt(metric.value)}</span>
+              </div>
+              <div class="data-item">
+                <span class="data-label">Estimate</span>
+                <span class="data-value big">${fmt(m.estimate)}</span>
+              </div>
+              <div class="data-item">
+                <span class="data-label">Period</span>
+                <span class="data-value">${metric.fiscal_period || ''} ${metric.fiscal_year || ''}</span>
+              </div>
+              <div class="data-item">
+                <span class="data-label">Filing</span>
+                <span class="data-value">${filing.form || ''} ${filing.filing_date || ''}</span>
+              </div>
+            </div>
+            <button class="detail-toggle" onclick="toggleJSON(this)">Show raw data ↓</button>
+            <div class="detail-json hidden">${JSON.stringify(rd, null, 2)}</div>`;
+        } else {
+          detailHTML = `
+            <div class="data-grid">
+              <div class="data-item">
+                <span class="data-label">Estimate</span>
+                <span class="data-value big">${fmt(m.estimate)}</span>
+              </div>
+              <div class="data-item">
+                <span class="data-label">Preset</span>
+                <span class="data-value">${m.preset || 'Custom'}</span>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div class="market-card ${cardClass}">
+            <div class="card-top">
+              <div>
+                <div class="card-company">${name}</div>
+                <div class="card-sub">${sub}</div>
+              </div>
+              <div class="card-badges">
+                ${sourceBadge}
+                ${statusBadge}
+              </div>
+            </div>
+            ${outcomeHTML}
+            ${detailHTML}
+            <div class="tags-row">
+              ${tags.slice(0, 3).map(t => `<span class="tag-chip">${truncTag(t, 28)}</span>`).join('')}
+              ${tags.length > 3 ? `<span class="tag-chip">+${tags.length - 3}</span>` : ''}
+            </div>
+            <div class="card-footer">
+              ${!done ? `<button class="btn btn-primary btn-sm" onclick="resolveMarket(${m.id}, this)">⚡ Resolve</button>` : ''}
+              <button class="btn btn-danger btn-sm" onclick="deleteMarket(${m.id})">✕</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function toggleJSON(btn) {
+      const pre = btn.nextElementSibling;
+      const showing = !pre.classList.contains('hidden');
+      pre.classList.toggle('hidden');
+      btn.textContent = showing ? 'Show raw data ↓' : 'Hide raw data ↑';
+    }
+
+    // ── Create ──
+    async function createMarket(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-create');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creating…';
+
+      const body = { source: currentSource };
+
+      if (currentSource === 'dart') {
+        const corpName = document.getElementById('inp-corp').value.trim();
+        if (!corpName) { toast('Enter a company name', 'error'); btn.disabled = false; btn.textContent = 'Create Market →'; return; }
+        body.corp_name = corpName;
+        body.stock_code = selectedCorp ? selectedCorp.stock_code : '';
+        body.currency = 'krw';
+        body.estimate = parseFloat(document.getElementById('inp-estimate-dart').value);
+      } else {
+        const cik = document.getElementById('inp-cik').value.trim();
+        if (!cik) { toast('Enter a CIK', 'error'); btn.disabled = false; btn.textContent = 'Create Market →'; return; }
+        body.cik = cik;
+        body.currency = 'usd';
+        body.estimate = parseFloat(document.getElementById('inp-estimate-sec').value);
+      }
+
+      if (isNaN(body.estimate)) { toast('Enter a valid estimate', 'error'); btn.disabled = false; btn.textContent = 'Create Market →'; return; }
+
+      if (currentPreset === 'custom') {
+        const raw = document.getElementById('inp-tags').value.trim();
+        if (!raw) { toast('Enter at least one tag', 'error'); btn.disabled = false; btn.textContent = 'Create Market →'; return; }
+        body.tags = raw.split(',').map(t => t.trim()).filter(Boolean);
+      } else {
+        body.preset = currentPreset;
+      }
+
+      try {
+        const res = await fetch('/api/markets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+        toast('Market created');
+        document.getElementById('create-form').reset();
+        selectedCorp = null;
+        document.getElementById('selected-info').innerHTML = '';
+        setSource(currentSource);
+        loadMarkets();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Market →';
+      }
+    }
+
+    // ── Resolve ──
+    async function resolveMarket(id, btn) {
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+
+      try {
+        const res = await fetch(`/api/markets/${id}/resolve`, { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'resolved') {
+          toast(`Resolved: ${data.outcome} POOL WINS`);
+        } else {
+          toast(data.message || 'No resolution yet', 'error');
+        }
+        loadMarkets();
+      } catch (err) {
+        toast('Resolution failed', 'error');
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    }
+
+    // ── Delete ──
+    async function deleteMarket(id) {
+      if (!confirm('Delete this market?')) return;
+      try {
+        await fetch(`/api/markets/${id}`, { method: 'DELETE' });
+        toast('Market deleted');
+        loadMarkets();
+      } catch (err) {
+        toast('Delete failed', 'error');
+      }
+    }
+
+    // ── Init ──
+    renderPresets();
+    setupAutocomplete();
+    loadKRUniverse();
+    loadMarkets();
+    setInterval(loadMarkets, 30000);
+  </script>
+</body>
+</html>
