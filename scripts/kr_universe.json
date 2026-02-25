@@ -1,0 +1,668 @@
+[
+  {
+    "stock_code": "086900",
+    "name_kr": "메디톡스",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "336570",
+    "name_kr": "원텍",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "214370",
+    "name_kr": "케어젠",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "214150",
+    "name_kr": "클래시스",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "214450",
+    "name_kr": "파마리서치",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "200670",
+    "name_kr": "휴메딕스",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "145020",
+    "name_kr": "휴젤",
+    "sector": "BEAUTY_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "079550",
+    "name_kr": "LIG넥스원",
+    "sector": "DEFENSE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "484870",
+    "name_kr": "엠앤씨솔루션",
+    "sector": "DEFENSE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "047810",
+    "name_kr": "한국항공우주",
+    "sector": "DEFENSE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "272210",
+    "name_kr": "한화시스템",
+    "sector": "DEFENSE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "012450",
+    "name_kr": "한화에어로스페이스",
+    "sector": "DEFENSE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "328130",
+    "name_kr": "루닛",
+    "sector": "DIGITAL_HEALTHCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "347700",
+    "name_kr": "스피어",
+    "sector": "DIGITAL_HEALTHCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "475960",
+    "name_kr": "토모큐브",
+    "sector": "DIGITAL_HEALTHCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "079160",
+    "name_kr": "CJ CGV",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "035760",
+    "name_kr": "CJ ENM",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "035900",
+    "name_kr": "JYP Ent.",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "037560",
+    "name_kr": "LG헬로비전",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "419530",
+    "name_kr": "SAMG엔터",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "034120",
+    "name_kr": "SBS",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "037270",
+    "name_kr": "YG PLUS",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "040300",
+    "name_kr": "YTN",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "473980",
+    "name_kr": "노머스",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "376300",
+    "name_kr": "디어유",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "053210",
+    "name_kr": "스카이라이프",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "253450",
+    "name_kr": "스튜디오드래곤",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "041510",
+    "name_kr": "에스엠",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "230360",
+    "name_kr": "에코마케팅",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "122870",
+    "name_kr": "와이지엔터테인먼트",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "214320",
+    "name_kr": "이노션",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "030000",
+    "name_kr": "제일기획",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "036420",
+    "name_kr": "콘텐트리중앙",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "182360",
+    "name_kr": "큐브엔터",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "352820",
+    "name_kr": "하이브",
+    "sector": "ENTERTAINMENT",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "001460",
+    "name_kr": "BYC",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "001530",
+    "name_kr": "DI동일",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "383220",
+    "name_kr": "F&F",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "093050",
+    "name_kr": "LF",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "000680",
+    "name_kr": "LS네트웍스",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "036620",
+    "name_kr": "감성코퍼레이션",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "000050",
+    "name_kr": "경방",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "081660",
+    "name_kr": "미스트홀딩스",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "035150",
+    "name_kr": "백산",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "031430",
+    "name_kr": "신세계인터내셔날",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "481070",
+    "name_kr": "에이유브랜즈",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "111770",
+    "name_kr": "영원무역",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "003200",
+    "name_kr": "일신방직",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "194370",
+    "name_kr": "제이에스코퍼레이션",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "004700",
+    "name_kr": "조광피혁",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "472850",
+    "name_kr": "폰드그룹",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "020000",
+    "name_kr": "한섬",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "105630",
+    "name_kr": "한세실업",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "241590",
+    "name_kr": "화승엔터프라이즈",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "006060",
+    "name_kr": "화승인더",
+    "sector": "FASHION",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "138610",
+    "name_kr": "나이벡",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "389650",
+    "name_kr": "넥스트바이오메디컬",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "145720",
+    "name_kr": "덴티움",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "376900",
+    "name_kr": "로킷헬스케어",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "394800",
+    "name_kr": "쓰리빌리언",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "096530",
+    "name_kr": "씨젠",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "137310",
+    "name_kr": "에스디바이오센서",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "290650",
+    "name_kr": "엘앤씨바이오",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "127120",
+    "name_kr": "제이에스링크",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "228760",
+    "name_kr": "지노믹트리",
+    "sector": "MEDICAL_DEVICE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "454910",
+    "name_kr": "두산로보틱스",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "277810",
+    "name_kr": "레인보우로보틱스",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "090360",
+    "name_kr": "로보스타",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "108490",
+    "name_kr": "로보티즈",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "056190",
+    "name_kr": "에스에프에이",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "388720",
+    "name_kr": "유일로보틱스",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "466100",
+    "name_kr": "클로봇",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "160190",
+    "name_kr": "하이젠알앤엠",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "319400",
+    "name_kr": "현대무벡스",
+    "sector": "ROBOTICS",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "000990",
+    "name_kr": "DB하이텍",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "403870",
+    "name_kr": "HPSP",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "095340",
+    "name_kr": "ISC",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "000660",
+    "name_kr": "SK하이닉스",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "353200",
+    "name_kr": "대덕전자",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "058470",
+    "name_kr": "리노공업",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "005930",
+    "name_kr": "삼성전자",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "357780",
+    "name_kr": "솔브레인",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "222800",
+    "name_kr": "심텍",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "240810",
+    "name_kr": "원익IPS",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "030530",
+    "name_kr": "원익홀딩스",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "084370",
+    "name_kr": "유진테크",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "039030",
+    "name_kr": "이오테크닉스",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "089030",
+    "name_kr": "테크윙",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "042700",
+    "name_kr": "한미반도체",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "014680",
+    "name_kr": "한솔케미칼",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "014680",
+    "name_kr": "한솔케미칼",
+    "sector": "SEMICONDUCTOR",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "051900",
+    "name_kr": "LG생활건강",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "092730",
+    "name_kr": "네오팜",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "483650",
+    "name_kr": "달바글로벌",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "018290",
+    "name_kr": "브이티",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "257720",
+    "name_kr": "실리콘투",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "352480",
+    "name_kr": "씨앤씨인터내셔널",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "090430",
+    "name_kr": "아모레퍼시픽",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "114840",
+    "name_kr": "아이패밀리에스씨",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "018250",
+    "name_kr": "애경산업",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "052020",
+    "name_kr": "에스티큐브",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "078520",
+    "name_kr": "에이블씨엔씨",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "278470",
+    "name_kr": "에이피알",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "226320",
+    "name_kr": "잇츠한불",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "192820",
+    "name_kr": "코스맥스",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "241710",
+    "name_kr": "코스메카코리아",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "237880",
+    "name_kr": "클리오",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "251970",
+    "name_kr": "펌텍코리아",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "161890",
+    "name_kr": "한국콜마",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "048410",
+    "name_kr": "현대바이오",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  },
+  {
+    "stock_code": "126560",
+    "name_kr": "현대퓨처넷",
+    "sector": "SKINCARE",
+    "market": "KOSPI"
+  }
+]
